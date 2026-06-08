@@ -25,9 +25,17 @@ jobs:
         push: true
         tags: portfolioregistry014.azurecr.io/portfolio-app:latest
 
-    - name: Deploy to Azure Web App
-      uses: azure/webapps-deploy@v3
+    - name: Azure Login
+      uses: azure/login@v1
       with:
-        app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-        images: portfolioregistry014.azurecr.io/portfolio-app:latest
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        creds: '{"clientId":"${{ secrets.REGISTRY_USERNAME }}","clientSecret":"${{ secrets.REGISTRY_PASSWORD }}","tenantId":"066500e6-1ea3-489f-a0df-f24589173738","subscriptionId":"a03f95c9-6918-4ac5-b7ca-3b95e7ec830f"}'
+
+    - name: Deploy container to Azure Web App
+      run: |
+        az webapp config container set \
+          --name umar-devops-portfolio \
+          --resource-group devops-portfolio-rg \
+          --docker-custom-image-name portfolioregistry014.azurecr.io/portfolio-app:latest \
+          --docker-registry-server-url https://portfolioregistry014.azurecr.io \
+          --docker-registry-server-user ${{ secrets.REGISTRY_USERNAME }} \
+          --docker-registry-server-password ${{ secrets.REGISTRY_PASSWORD }}
